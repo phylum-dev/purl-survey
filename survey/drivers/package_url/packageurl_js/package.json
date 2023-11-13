@@ -1,0 +1,5 @@
+{
+    "dependencies": {
+        "packageurl-js": "file:repo"
+    }
+}

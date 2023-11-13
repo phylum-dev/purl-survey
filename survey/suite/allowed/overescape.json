@@ -1,0 +1,100 @@
+[
+  {
+    "code": "wrong_format",
+    "test": "plus signs are plus signs",
+    "reason": "Wrong format for {\"type\": \"golang\", \"name\": \"widgets+\", \"namespace\": \"example+.com\", \"version\": \"v1.0.0+5\", \"qualifiers\": {\"x_plus\": \"a+b\"}, \"subpath\": \"a+\"}",
+    "expected": "pkg:golang/example+.com/widgets+@v1.0.0+5?x_plus=a%2Bb#a+",
+    "actual": "pkg:golang/example%2B.com/widgets%2B@v1.0.0%2B5?x_plus=a%2Bb#a+"
+  },
+  {
+    "code": "wrong_format",
+    "test": "plus signs are plus signs",
+    "reason": "Wrong format for {\"type\": \"golang\", \"name\": \"widgets+\", \"namespace\": \"example+.com\", \"version\": \"v1.0.0+5\", \"qualifiers\": {\"x_plus\": \"a+b\"}, \"subpath\": \"a+\"}",
+    "expected": "pkg:golang/example+.com/widgets+@v1.0.0+5?x_plus=a%2Bb#a+",
+    "actual": "pkg:golang/example%2B.com/widgets%2B@v1.0.0%2B5?x_plus=a%2Bb#a%2B"
+  },
+  {
+    "code": "wrong_format",
+    "test": "plus signs are plus signs",
+    "reason": "Wrong format for {\"type\": \"golang\", \"name\": \"widgets+\", \"namespace\": \"example+.com\", \"version\": \"v1.0.0+5\", \"qualifiers\": {\"x_plus\": \"a+b\"}, \"subpath\": \"a+\"}",
+    "expected": "pkg:golang/example+.com/widgets+@v1.0.0+5?x_plus=a%2Bb#a+",
+    "actual": "pkg:golang/example%2B.com/widgets%2B@v1.0.0+5?x_plus=a%2Bb#a%2B"
+  },
+  {
+    "code": "wrong_format",
+    "test": "Hugging Face model with staging endpoint",
+    "reason": "Wrong format for {\"type\": \"huggingface\", \"name\": \"deberta-v3-base\", \"namespace\": \"microsoft\", \"version\": \"559062ad13d311b87b2c455e67dcd5f1c8f65111\", \"qualifiers\": {\"repository_url\": \"https://hub-ci.huggingface.co\"}}",
+    "expected": "pkg:huggingface/microsoft/deberta-v3-base@559062ad13d311b87b2c455e67dcd5f1c8f65111?repository_url=https://hub-ci.huggingface.co",
+    "actual": "pkg:huggingface/microsoft/deberta-v3-base@559062ad13d311b87b2c455e67dcd5f1c8f65111?repository_url=https%3A//hub-ci.huggingface.co"
+  },
+  {
+    "code": "wrong_format",
+    "test": "MLflow model tracked in Azure Databricks (case insensitive)",
+    "reason": "Wrong format for {\"type\": \"mlflow\", \"name\": \"creditfraud\", \"version\": \"3\", \"qualifiers\": {\"repository_url\": \"https://adb-5245952564735461.0.azuredatabricks.net/api/2.0/mlflow\"}}",
+    "expected": "pkg:mlflow/creditfraud@3?repository_url=https://adb-5245952564735461.0.azuredatabricks.net/api/2.0/mlflow",
+    "actual": "pkg:mlflow/creditfraud@3?repository_url=https%3A//adb-5245952564735461.0.azuredatabricks.net/api/2.0/mlflow"
+  },
+  {
+    "code": "wrong_format",
+    "test": "MLflow model tracked in Azure ML (case sensitive)",
+    "reason": "Wrong format for {\"type\": \"mlflow\", \"name\": \"CreditFraud\", \"version\": \"3\", \"qualifiers\": {\"repository_url\": \"https://westus2.api.azureml.ms/mlflow/v1.0/subscriptions/a50f2011-fab8-4164-af23-c62881ef8c95/resourceGroups/TestResourceGroup/providers/Microsoft.MachineLearningServices/workspaces/TestWorkspace\"}}",
+    "expected": "pkg:mlflow/CreditFraud@3?repository_url=https://westus2.api.azureml.ms/mlflow/v1.0/subscriptions/a50f2011-fab8-4164-af23-c62881ef8c95/resourceGroups/TestResourceGroup/providers/Microsoft.MachineLearningServices/workspaces/TestWorkspace",
+    "actual": "pkg:mlflow/CreditFraud@3?repository_url=https%3A//westus2.api.azureml.ms/mlflow/v1.0/subscriptions/a50f2011-fab8-4164-af23-c62881ef8c95/resourceGroups/TestResourceGroup/providers/Microsoft.MachineLearningServices/workspaces/TestWorkspace"
+  },
+  {
+    "code": "wrong_format",
+    "test": "MLflow model with unique identifiers",
+    "reason": "Wrong format for {\"type\": \"mlflow\", \"name\": \"trafficsigns\", \"version\": \"10\", \"qualifiers\": {\"model_uuid\": \"36233173b22f4c89b451f1228d700d49\", \"repository_url\": \"https://adb-5245952564735461.0.azuredatabricks.net/api/2.0/mlflow\", \"run_id\": \"410a3121-2709-4f88-98dd-dba0ef056b0a\"}}",
+    "expected": "pkg:mlflow/trafficsigns@10?model_uuid=36233173b22f4c89b451f1228d700d49&repository_url=https://adb-5245952564735461.0.azuredatabricks.net/api/2.0/mlflow&run_id=410a3121-2709-4f88-98dd-dba0ef056b0a",
+    "actual": "pkg:mlflow/trafficsigns@10?model_uuid=36233173b22f4c89b451f1228d700d49&repository_url=https%3A//adb-5245952564735461.0.azuredatabricks.net/api/2.0/mlflow&run_id=410a3121-2709-4f88-98dd-dba0ef056b0a"
+  },
+  {
+    "code": "wrong_format",
+    "test": "Hugging Face model with staging endpoint",
+    "reason": "Wrong format for {\"type\": \"huggingface\", \"name\": \"deberta-v3-base\", \"namespace\": \"microsoft\", \"version\": \"559062ad13d311b87b2c455e67dcd5f1c8f65111\", \"qualifiers\": {\"repository_url\": \"https://hub-ci.huggingface.co\"}}",
+    "expected": "pkg:huggingface/microsoft/deberta-v3-base@559062ad13d311b87b2c455e67dcd5f1c8f65111?repository_url=https://hub-ci.huggingface.co",
+    "actual": "pkg:huggingface/microsoft/deberta-v3-base@559062ad13d311b87b2c455e67dcd5f1c8f65111?repository_url=https%3A%2F%2Fhub-ci.huggingface.co"
+  },
+  {
+    "code": "wrong_format",
+    "test": "MLflow model tracked in Azure Databricks (case insensitive)",
+    "reason": "Wrong format for {\"type\": \"mlflow\", \"name\": \"creditfraud\", \"version\": \"3\", \"qualifiers\": {\"repository_url\": \"https://adb-5245952564735461.0.azuredatabricks.net/api/2.0/mlflow\"}}",
+    "expected": "pkg:mlflow/creditfraud@3?repository_url=https://adb-5245952564735461.0.azuredatabricks.net/api/2.0/mlflow",
+    "actual": "pkg:mlflow/creditfraud@3?repository_url=https%3A%2F%2Fadb-5245952564735461.0.azuredatabricks.net%2Fapi%2F2.0%2Fmlflow"
+  },
+  {
+    "code": "wrong_format",
+    "test": "MLflow model tracked in Azure ML (case sensitive)",
+    "reason": "Wrong format for {\"type\": \"mlflow\", \"name\": \"CreditFraud\", \"version\": \"3\", \"qualifiers\": {\"repository_url\": \"https://westus2.api.azureml.ms/mlflow/v1.0/subscriptions/a50f2011-fab8-4164-af23-c62881ef8c95/resourceGroups/TestResourceGroup/providers/Microsoft.MachineLearningServices/workspaces/TestWorkspace\"}}",
+    "expected": "pkg:mlflow/CreditFraud@3?repository_url=https://westus2.api.azureml.ms/mlflow/v1.0/subscriptions/a50f2011-fab8-4164-af23-c62881ef8c95/resourceGroups/TestResourceGroup/providers/Microsoft.MachineLearningServices/workspaces/TestWorkspace",
+    "actual": "pkg:mlflow/CreditFraud@3?repository_url=https%3A%2F%2Fwestus2.api.azureml.ms%2Fmlflow%2Fv1.0%2Fsubscriptions%2Fa50f2011-fab8-4164-af23-c62881ef8c95%2FresourceGroups%2FTestResourceGroup%2Fproviders%2FMicrosoft.MachineLearningServices%2Fworkspaces%2FTestWorkspace"
+  },
+  {
+    "code": "wrong_format",
+    "test": "MLflow model with unique identifiers",
+    "reason": "Wrong format for {\"type\": \"mlflow\", \"name\": \"trafficsigns\", \"version\": \"10\", \"qualifiers\": {\"model_uuid\": \"36233173b22f4c89b451f1228d700d49\", \"repository_url\": \"https://adb-5245952564735461.0.azuredatabricks.net/api/2.0/mlflow\", \"run_id\": \"410a3121-2709-4f88-98dd-dba0ef056b0a\"}}",
+    "expected": "pkg:mlflow/trafficsigns@10?model_uuid=36233173b22f4c89b451f1228d700d49&repository_url=https://adb-5245952564735461.0.azuredatabricks.net/api/2.0/mlflow&run_id=410a3121-2709-4f88-98dd-dba0ef056b0a",
+    "actual": "pkg:mlflow/trafficsigns@10?model_uuid=36233173b22f4c89b451f1228d700d49&repository_url=https%3A%2F%2Fadb-5245952564735461.0.azuredatabricks.net%2Fapi%2F2.0%2Fmlflow&run_id=410a3121-2709-4f88-98dd-dba0ef056b0a"
+  },
+  {
+    "code": "wrong_format",
+    "test": "docker uses qualifiers and hash image id as versions",
+    "reason": "Wrong format for {\"type\": \"docker\", \"name\": \"dockerimage\", \"namespace\": \"customer\", \"version\": \"sha256:244fd47e07d1004f0aed9c\", \"qualifiers\": {\"repository_url\": \"gcr.io\"}}",
+    "expected": "pkg:docker/customer/dockerimage@sha256:244fd47e07d1004f0aed9c?repository_url=gcr.io",
+    "actual": "pkg:docker/customer/dockerimage@sha256%3A244fd47e07d1004f0aed9c?repository_url=gcr.io"
+  },
+  {
+    "code": "wrong_format",
+    "test": "maven often uses qualifiers",
+    "reason": "Wrong format for {\"type\": \"maven\", \"name\": \"batik-anim\", \"namespace\": \"org.apache.xmlgraphics\", \"version\": \"1.9.1\", \"qualifiers\": {\"classifier\": \"sources\", \"repository_url\": \"repo.spring.io/release\"}}",
+    "expected": "pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?classifier=sources&repository_url=repo.spring.io/release",
+    "actual": "pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?classifier=sources&repository_url=repo.spring.io%2Frelease"
+  },
+  {
+    "code": "wrong_format",
+    "test": "maven pom reference",
+    "reason": "Wrong format for {\"type\": \"maven\", \"name\": \"batik-anim\", \"namespace\": \"org.apache.xmlgraphics\", \"version\": \"1.9.1\", \"qualifiers\": {\"extension\": \"pom\", \"repository_url\": \"repo.spring.io/release\"}}",
+    "expected": "pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?extension=pom&repository_url=repo.spring.io/release",
+    "actual": "pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?extension=pom&repository_url=repo.spring.io%2Frelease"
+  }
+]

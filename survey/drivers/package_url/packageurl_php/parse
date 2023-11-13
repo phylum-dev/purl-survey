@@ -1,0 +1,29 @@
+<?php
+
+include("repo/src/BuildParseTrait.php");
+include("repo/src/PackageUrl.php");
+include("repo/src/PackageUrlParser.php");
+
+use PackageUrl\PackageUrl;
+
+while ($line = fgets(STDIN)) {
+    $line = trim($line);
+    if ($line == "") {
+        continue;
+    }
+    try {
+        $purl = PackageUrl::fromString($line);
+        echo json_encode([
+            "type" => $purl->getType(),
+            "name" => $purl->getName(),
+            "namespace" => $purl->getNamespace(),
+            "version" => $purl->getVersion(),
+            "qualifiers" => $purl->getQualifiers(),
+            "subpath" => $purl->getSubpath(),
+        ]) . PHP_EOL;
+    } catch (Throwable $e) {
+        echo json_encode(["error" => strval($e)]) . PHP_EOL;
+    }
+}
+
+?>

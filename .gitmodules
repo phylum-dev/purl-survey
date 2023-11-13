@@ -1,0 +1,42 @@
+[submodule "survey/drivers/package_url/packageurl_js/repo"]
+	path = survey/drivers/package_url/packageurl_js/repo
+	url = https://github.com/package-url/packageurl-js.git
+[submodule "survey/drivers/package_url/packageurl_dotnet/repo"]
+	path = survey/drivers/package_url/packageurl_dotnet/repo
+	url = https://github.com/package-url/packageurl-dotnet.git
+[submodule "survey/drivers/package_url/packageurl_go/repo"]
+	path = survey/drivers/package_url/packageurl_go/repo
+	url = https://github.com/package-url/packageurl-go.git
+[submodule "survey/drivers/package_url/packageurl_java/repo"]
+	path = survey/drivers/package_url/packageurl_java/repo
+	url = https://github.com/package-url/packageurl-java.git
+[submodule "survey/drivers/package_url/packageurl_php/repo"]
+	path = survey/drivers/package_url/packageurl_php/repo
+	url = https://github.com/package-url/packageurl-php.git
+[submodule "survey/drivers/package_url/packageurl_python/repo"]
+	path = survey/drivers/package_url/packageurl_python/repo
+	url = https://github.com/package-url/packageurl-python.git
+[submodule "survey/drivers/package_url/packageurl_ruby/repo"]
+	path = survey/drivers/package_url/packageurl_ruby/repo
+	url = https://github.com/package-url/packageurl-ruby.git
+[submodule "survey/drivers/package_url/packageurl_swift/repo"]
+	path = survey/drivers/package_url/packageurl_swift/repo
+	url = https://github.com/package-url/packageurl-swift.git
+[submodule "survey/drivers/phylum_dev/purl/repo"]
+	path = survey/drivers/phylum_dev/purl/repo
+	url = https://github.com/phylum-dev/purl.git
+[submodule "survey/drivers/althonos/packageurl_rs/repo"]
+	path = survey/drivers/althonos/packageurl_rs/repo
+	url = https://github.com/althonos/packageurl.rs.git
+[submodule "spec"]
+	path = spec
+	url = https://github.com/package-url/purl-spec
+[submodule "survey/drivers/sonatype/package-url-java/repo"]
+	path = survey/drivers/sonatype/package-url-java/repo
+	url = https://github.com/sonatype/package-url-java.git
+[submodule "survey/drivers/maennchen/purl/repo"]
+	path = survey/drivers/maennchen/purl/repo
+	url = https://github.com/maennchen/purl.git
+[submodule "survey/drivers/giterlizzi/perl_uri_packageurl/repo"]
+	path = survey/drivers/giterlizzi/perl_uri_packageurl/repo
+	url = https://github.com/giterlizzi/perl-URI-PackageURL.git

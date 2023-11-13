@@ -1,0 +1,31 @@
+#!/usr/bin/env perl
+
+use v5.10;
+use strict;
+
+use JSON;
+use Try::Tiny;
+
+use lib 'repo/lib';
+use URI::PackageURL;
+
+LINE: while (<STDIN>) {
+    $_ =~ s/^\s+//;
+    $_ =~ s/\s+$//;
+    next LINE if /^$/;
+
+    try {
+        my $purl = decode_purl $_;
+        say encode_json {
+            type => $purl->type,
+            name => $purl->name,
+            namespace => $purl->namespace,
+            version => $purl->version,
+            qualifiers => $purl->qualifiers,
+            subpath => $purl->subpath,
+        };
+    } catch {
+        say encode_json {error => $_};
+    };
+    STDOUT->flush;
+}

@@ -1,0 +1,35 @@
+<?php
+
+include("repo/src/BuildParseTrait.php");
+include("repo/src/PackageUrl.php");
+include("repo/src/PackageUrlBuilder.php");
+
+use PackageUrl\PackageUrl;
+
+while ($line = fgets(STDIN)) {
+    $line = trim($line);
+    if ($line == "") {
+        continue;
+    }
+    try {
+        $parts = json_decode($line, true);
+        $purl = new PackageUrl($parts["type"], $parts["name"]);
+        if (isset($parts["namespace"])) {
+            $purl = $purl->setNamespace($parts["namespace"]);
+        }
+        if (isset($parts["version"]))     {
+            $purl = $purl->setVersion($parts["version"]);
+        }
+        if (isset($parts["qualifiers"])) {
+            $purl = $purl->setQualifiers($parts["qualifiers"]);
+        }
+        if (isset($parts["subpath"])) {
+            $purl = $purl->setSubpath($parts["subpath"]);
+        }
+        echo $purl . PHP_EOL;
+    } catch (Throwable $e) {
+        echo json_encode(["error" => strval($e)]) . PHP_EOL;
+    }
+}
+
+?>

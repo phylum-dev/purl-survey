@@ -1,0 +1,32 @@
+[
+  {
+    "code": "round_trip",
+    "test": "nuget names are case sensitive",
+    "reason": "Serialized purl pkg:nuget/enterpriselibrary.common@6.0.1304 did not parse as its input",
+    "expected": {
+      "type": "nuget",
+      "name": "EnterpriseLibrary.Common",
+      "version": "6.0.1304"
+    },
+    "actual": {
+      "type": "nuget",
+      "name": "enterpriselibrary.common",
+      "version": "6.0.1304"
+    }
+  },
+  {
+    "code": "wrong_parse_case",
+    "test": "nuget names are case sensitive",
+    "reason": "Wrong case for valid purl pkg:Nuget/EnterpriseLibrary.Common@6.0.1304",
+    "expected": {
+      "type": "nuget",
+      "name": "EnterpriseLibrary.Common",
+      "version": "6.0.1304"
+    },
+    "actual": {
+      "type": "nuget",
+      "name": "enterpriselibrary.common",
+      "version": "6.0.1304"
+    }
+  }
+]
