@@ -14,6 +14,7 @@ This repository contains code for exercising several PURL implementations.
 - [package-url/packageurl-ruby](https://github.com/package-url/packageurl-ruby)
 - [package-url/packageurl-swift](https://github.com/package-url/packageurl-swift)
 - [phylum-dev/purl](https://github.com/phylum-dev/purl)
+- [sonatype/package-url-java](https://github.com/sonatype/package-url-java.git)
 
 For each supported implementation, there are two small programs that read lines from stdin and write lines to stdout:
 
