@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,11 +30,7 @@ public class parse {
                 parts.qualifiers = purl.getQualifiers();
                 parts.subpath = purl.getSubpath();
                 mapper.writeValue(System.out, parts);
-            } catch (MalformedPackageURLException e) {
-                Error error = new Error();
-                error.error = e.toString();
-                mapper.writeValue(System.out, error);
-            } catch (NullPointerException e) {
+            } catch (Exception e) {
                 Error error = new Error();
                 error.error = e.toString();
                 mapper.writeValue(System.out, error);
