@@ -3,7 +3,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.TreeMap;
 
-import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DatabindException;
@@ -31,12 +30,7 @@ public class format {
                 }
                 PackageURL purl = new PackageURL(parts.type, parts.namespace, parts.name, parts.version, qualifiers, parts.subpath);
                 System.out.println(purl);
-            } catch (MalformedPackageURLException e) {
-                Error error = new Error();
-                error.error = e.toString();
-                mapper.writeValue(System.out, error);
-                System.out.println();
-            } catch (NullPointerException e) {
+            } catch (Exception e) {
                 Error error = new Error();
                 error.error = e.toString();
                 mapper.writeValue(System.out, error);

@@ -3,7 +3,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.TreeMap;
 
-import org.sonatype.goodies.packageurl.InvalidException;
 import org.sonatype.goodies.packageurl.PackageUrl;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DatabindException;
@@ -31,7 +30,7 @@ public class format {
                 }
                 PackageUrl purl = PackageUrl.builder().type(parts.type).namespace(parts.namespace).name(parts.name).version(parts.version).qualifiers(qualifiers).subpath(parts.subpath).build();
                 System.out.println(purl);
-            } catch (InvalidException e) {
+            } catch (Exception e) {
                 Error error = new Error();
                 error.error = e.toString();
                 mapper.writeValue(System.out, error);

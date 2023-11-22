@@ -31,8 +31,8 @@
 [submodule "spec"]
 	path = spec
 	url = https://github.com/package-url/purl-spec
-[submodule "survey/drivers/sonatype/package-url-java/repo"]
-	path = survey/drivers/sonatype/package-url-java/repo
+[submodule "survey/drivers/sonatype/package_url_java/repo"]
+	path = survey/drivers/sonatype/package_url_java/repo
 	url = https://github.com/sonatype/package-url-java.git
 [submodule "survey/drivers/maennchen/purl/repo"]
 	path = survey/drivers/maennchen/purl/repo

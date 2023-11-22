@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import org.sonatype.goodies.packageurl.InvalidException;
 import org.sonatype.goodies.packageurl.PackageUrl;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,7 +30,7 @@ public class parse {
                 parts.qualifiers = purl.getQualifiers();
                 parts.subpath = purl.getSubpathAsString();
                 mapper.writeValue(System.out, parts);
-            } catch (InvalidException e) {
+            } catch (Exception e) {
                 Error error = new Error();
                 error.error = e.toString();
                 mapper.writeValue(System.out, error);
