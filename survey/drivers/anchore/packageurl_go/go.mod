@@ -1,4 +1,4 @@
-module github.com/matt-phylum/purl-driver
+module github.com/phylum-dev/purl-survey
 
 replace github.com/anchore/packageurl-go => ./repo
 

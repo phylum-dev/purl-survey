@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/anchore/packageurl-go"
-	"github.com/matt-phylum/purl-driver/model"
+	"github.com/phylum-dev/purl-survey/model"
 )
 
 func main() {
