@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/package-url/packageurl-go"
+	"github.com/anchore/packageurl-go"
 	"github.com/phylum-dev/purl-survey/model"
 )
 
@@ -35,25 +35,6 @@ func main() {
 			Qualifiers: packageurl.QualifiersFromMap(parts.Qualifiers),
 			Subpath:    parts.Subpath,
 		}
-		err = purl.Normalize()
-		if err == nil {
-			fmt.Println(purl)
-		} else {
-			parts := model.Error{
-				Error: fmt.Sprint(err),
-			}
-			out, err := json.Marshal(parts)
-			if err != nil {
-				panic(err)
-			}
-			_, err = os.Stdout.Write(out)
-			if err != nil {
-				panic(err)
-			}
-			_, err = os.Stdout.WriteString("\n")
-			if err != nil {
-				panic(err)
-			}
-		}
+		fmt.Println(purl)
 	}
 }

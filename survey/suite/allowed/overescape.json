@@ -96,5 +96,12 @@
     "reason": "Wrong format for {\"type\": \"maven\", \"name\": \"batik-anim\", \"namespace\": \"org.apache.xmlgraphics\", \"version\": \"1.9.1\", \"qualifiers\": {\"extension\": \"pom\", \"repository_url\": \"repo.spring.io/release\"}}",
     "expected": "pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?extension=pom&repository_url=repo.spring.io/release",
     "actual": "pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?extension=pom&repository_url=repo.spring.io%2Frelease"
+  },
+  {
+    "code": "wrong_format",
+    "test": "percent signs are properly encoded and decoded",
+    "reason": "Wrong format for {\"type\": \"generic\", \"name\": \"100%\", \"namespace\": \"100%\", \"version\": \"100%\", \"qualifiers\": {\"repository_url\": \"https://example.com/100%25/\"}, \"subpath\": \"100%\"}",
+    "expected": "pkg:generic/100%25/100%25@100%25?repository_url=https://example.com/100%2525/#100%25",
+    "actual": "pkg:generic/100%25/100%25@100%25?repository_url=https%3A%2F%2Fexample.com%2F100%2525%2F#100%25"
   }
 ]

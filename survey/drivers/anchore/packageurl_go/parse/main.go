@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/package-url/packageurl-go"
+	"github.com/anchore/packageurl-go"
 	"github.com/phylum-dev/purl-survey/model"
 )
 
