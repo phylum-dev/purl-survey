@@ -13,12 +13,20 @@ while ($line = fgets(STDIN)) {
     }
     try {
         $purl = PackageUrl::fromString($line);
+
+        // `checksum` is a qualifier but it isn't returned by `getQualifiers`.
+        $qualifiers = $purl->getQualifiers();
+        $checksums = $purl->getChecksums();
+        if (null !== $checksums) {
+            $qualifiers["checksum"] = implode(",", $checksums);
+        }
+
         echo json_encode([
             "type" => $purl->getType(),
             "name" => $purl->getName(),
             "namespace" => $purl->getNamespace(),
             "version" => $purl->getVersion(),
-            "qualifiers" => $purl->getQualifiers(),
+            "qualifiers" => $qualifiers,
             "subpath" => $purl->getSubpath(),
         ]) . PHP_EOL;
     } catch (Throwable $e) {
