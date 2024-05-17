@@ -91,7 +91,10 @@ if __name__ == "__main__":
                     # If any of the implementations returns something new, report it and mark it for follow up.
                     format_results = dict()
                     for (impl, formatted) in results:
-                        format_results.setdefault(formatted, []).append(impl)
+                        if isinstance(formatted, Error):
+                            print(f"Error from {impl.driver.name}: {formatted}")
+                        else:
+                            format_results.setdefault(formatted, []).append(impl)
 
                     for formatted, result_impls in format_results.items():
                         if formatted not in seen:

@@ -21,7 +21,11 @@ while ($line = fgets(STDIN)) {
             $purl = $purl->setVersion($parts["version"]);
         }
         if (isset($parts["qualifiers"])) {
-            $purl = $purl->setQualifiers($parts["qualifiers"]);
+            // `checksum` is a qualifier but passing it to `setQualifiers` is an error.
+            $qualifiers = $parts["qualifiers"];
+            $checksums = $qualifiers["checksum"] ?? "";
+            unset($qualifiers["checksum"]);
+            $purl = $purl->setQualifiers($qualifiers)->setChecksums(explode(",", $checksums));
         }
         if (isset($parts["subpath"])) {
             $purl = $purl->setSubpath($parts["subpath"]);
