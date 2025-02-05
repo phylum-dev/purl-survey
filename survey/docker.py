@@ -43,7 +43,10 @@ class DockerParser:
     async def __aexit__(self, exc_type, exc_value, traceback):
         # The Python documentation says communicate always closes stdin,
         # but it only closes if a value is passed.
-        await self.process.communicate(b"")
+        try:
+            await self.process.communicate(b"")
+        except Exception:
+            pass
 
     async def parse(self, purls):
         async def write_request():
@@ -55,7 +58,10 @@ class DockerParser:
             results = []
             for _ in purls:
                 line = await self.process.stdout.readline()
-                line = json.loads(line)
+                try:
+                    line = json.loads(line)
+                except Exception:
+                    line = {"error": f"invalid json: {line}"}
                 error = line.get("error")
                 if error is not None:
                     results.append(Error(error))
