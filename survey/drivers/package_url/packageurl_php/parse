@@ -1,5 +1,7 @@
 <?php
 
+error_reporting(E_ALL ^ E_DEPRECATED);
+
 include("repo/src/BuildParseTrait.php");
 include("repo/src/PackageUrl.php");
 include("repo/src/PackageUrlParser.php");
