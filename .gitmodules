@@ -33,7 +33,7 @@
 	url = https://github.com/package-url/purl-spec
 [submodule "survey/drivers/sonatype/package_url_java/repo"]
 	path = survey/drivers/sonatype/package_url_java/repo
-	url = https://github.com/sonatype/package-url-java.git
+	url = https://github.com/sonatype/package-url-java
 [submodule "survey/drivers/maennchen/purl/repo"]
 	path = survey/drivers/maennchen/purl/repo
 	url = https://github.com/maennchen/purl.git
