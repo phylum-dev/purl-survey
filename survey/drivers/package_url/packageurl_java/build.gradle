@@ -8,7 +8,7 @@ repositories {
 
 dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
-    implementation fileTree(dir: "$projectDir/repo/target", includes: ["packageurl-java-*-SNAPSHOT.jar"])
+    implementation fileTree(dir: "$projectDir/repo/target", includes: ["packageurl-java-*.jar"])
 }
 
 tasks.register('stage', Copy) {
