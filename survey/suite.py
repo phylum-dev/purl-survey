@@ -6,6 +6,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
+from urllib.parse import unquote
 
 from tqdm import tqdm
 
@@ -40,13 +41,6 @@ class Failure:
             actual=j.get("actual"),
         )
 
-# Suppress these failures.
-allowed = []
-for allow_file in (Path(__file__).parent / "suite/allowed").glob("*.json"):
-    with allow_file.open() as f:
-        for allowed_failure in json.load(f):
-            allowed.append(Failure.from_json(allowed_failure))
-
 if __name__ == "__main__":
     from . import drivers, Error, Parts
 
@@ -67,6 +61,15 @@ if __name__ == "__main__":
                     async with await driver.parser() as parser:
                         async with await driver.formatter() as formatter:
                             for test in suite:
+                                parts = Parts(
+                                    type=test["type"],
+                                    name=test["name"],
+                                    namespace=test["namespace"],
+                                    version=test["version"],
+                                    qualifiers=test["qualifiers"],
+                                    subpath=test["subpath"],
+                                )
+
                                 if test["is_invalid"]:
                                     [error] = await parser.parse([test["purl"]])
                                     if not isinstance(error, Error):
@@ -75,181 +78,190 @@ if __name__ == "__main__":
                                                 implementation=driver.name,
                                                 code="unexpected_success",
                                                 test=test["description"],
-                                                reason=f"Expected an error for invalid purl {test['purl']}",
+                                                reason=f"Expected an error parsing invalid purl {test['purl']}",
                                                 expected="[error]",
-                                                actual=error.normalize().to_json(),
+                                                actual=error.to_json(),
+                                            )
+                                        )
+                                    [error] = await formatter.format([parts])
+                                    if not isinstance(error, Error):
+                                        failures.append(
+                                            Failure(
+                                                implementation=driver.name,
+                                                code="unexpected_success",
+                                                test=test["description"],
+                                                reason=f"Expected an error formatting invalid purl {test['purl']}",
+                                                expected="[error]",
+                                                actual=error,
                                             )
                                         )
                                 else:
-                                    expected = Parts(
-                                        type=test["type"],
-                                        name=test["name"],
-                                        namespace=test["namespace"],
-                                        version=test["version"],
-                                        qualifiers=test["qualifiers"],
-                                        subpath=test["subpath"],
-                                    ).normalize()
                                     [purl, canonical] = await parser.parse(
                                         [test["purl"], test["canonical_purl"]]
                                     )
+                                    formatted = iter(await formatter.format(
+                                        [p.normalize() for p in [purl, canonical] if not isinstance(p, Error)] + [parts]
+                                    ))
+                                    if isinstance(purl, Error):
+                                        purl_formatted = None
+                                    else:
+                                        purl_formatted = next(formatted)
+                                    if isinstance(canonical, Error):
+                                        canonical_formatted = None
+                                    else:
+                                        canonical_formatted = next(formatted)
+                                    parts_formatted = next(formatted)
+
+                                    async def compare_to_canonical(parsed, formatted, name):
+                                        if formatted == test['canonical_purl']:
+                                            return
+                                        [reparsed] = await parser.parse([formatted])
+                                        if isinstance(reparsed, Error):
+                                            failures.append(
+                                                Failure(
+                                                    implementation=driver.name,
+                                                    code="wrong_format",
+                                                    test=test["description"],
+                                                    reason=f"Parsing and re-formatting {name} PURL resulted in an invalid PURL {formatted}",
+                                                    expected=test["canonical_purl"],
+                                                    actual=formatted,
+                                                )
+                                            )
+                                        elif parsed.normalize() != reparsed.normalize():
+                                            failures.append(
+                                                Failure(
+                                                    implementation=driver.name,
+                                                    code="wrong_format",
+                                                    test=test["description"],
+                                                    reason=f"Parsing and re-formatting {name} PURL resulted in a different PURL",
+                                                    expected=test["canonical_purl"],
+                                                    actual=canonical_formatted,
+                                                )
+                                            )
+                                        elif unquote(canonical_formatted) == unquote(test["canonical_purl"]):
+                                            # This isn't exactly right, but other encoding problems should cause wrong_format first.
+                                            failures.append(
+                                                Failure(
+                                                    implementation=driver.name,
+                                                    code="wrong_encode",
+                                                    test=test["description"],
+                                                    reason=f"Parsing and re-formatting {name} PURL resulted in wrong encoding",
+                                                    expected=test["canonical_purl"],
+                                                    actual=canonical_formatted,
+                                                )
+                                            )
+                                        elif unquote(formatted).casefold() == unquote(test["canonical_purl"]).casefold():
+                                            failures.append(
+                                                Failure(
+                                                    implementation=driver.name,
+                                                    code="wrong_case",
+                                                    test=test["description"],
+                                                    reason=f"Parsing and re-formatting {name} PURL resulted in wrong casing",
+                                                    expected=test["canonical_purl"],
+                                                    actual=canonical_formatted,
+                                                )
+                                            )
+                                        else:
+                                            # Formatting errors should be caught by the above cases.
+                                            failures.append(
+                                                Failure(
+                                                    implementation=driver.name,
+                                                    code="wrong_parse",
+                                                    test=test["description"],
+                                                    reason=f"Parsing and re-formatting {name} PURL resulted in wrong PURL",
+                                                    expected=test["canonical_purl"],
+                                                    actual=canonical_formatted,
+                                                )
+                                            )
+
+                                    if isinstance(canonical, Error):
+                                        failures.append(
+                                            Failure(
+                                                implementation=driver.name,
+                                                code="unexpected_failure",
+                                                test=test["description"],
+                                                reason=f"Unexpected error parsing canonical purl {test['canonical_purl']}",
+                                                expected="[no error]",
+                                                actual=canonical.to_json(),
+                                            )
+                                        )
+                                    elif isinstance(canonical_formatted, Error) or canonical_formatted == "":
+                                        failures.append(
+                                            Failure(
+                                                implementation=driver.name,
+                                                code="unexpected_failure",
+                                                test=test["description"],
+                                                reason=f"Unexpected error formatting canonical purl {json.dumps(canonical.to_json())}",
+                                                expected=test["canonical_purl"],
+                                                actual=formatted.to_json(),
+                                            )
+                                        )
+                                    else:
+                                        await compare_to_canonical(canonical, canonical_formatted, "canonical")
+
                                     if isinstance(purl, Error):
                                         failures.append(
                                             Failure(
                                                 implementation=driver.name,
                                                 code="unexpected_failure",
                                                 test=test["description"],
-                                                reason=f"Expected no error for valid purl {test['purl']}",
-                                                expected=expected.to_json(),
+                                                reason=f"Expected no error parsing test purl {test['purl']}",
+                                                expected=canonical.to_json(),
                                                 actual=purl.to_json(),
                                             )
                                         )
-                                    elif isinstance(canonical, Error):
+                                    elif isinstance(purl_formatted, Error):
                                         failures.append(
                                             Failure(
                                                 implementation=driver.name,
                                                 code="unexpected_failure",
                                                 test=test["description"],
-                                                reason=f"Expected no error for canonical purl {test['canonical_purl']}",
-                                                expected=expected.to_json(),
-                                                actual=canonical.to_json(),
-                                            )
-                                        )
-                                    else:
-                                        if (
-                                            expected.casefold()
-                                            != purl.normalize().casefold()
-                                        ):
-                                            failures.append(
-                                                Failure(
-                                                    implementation=driver.name,
-                                                    code="wrong_parse",
-                                                    test=test["description"],
-                                                    reason=f"Wrong parse for valid purl {test['purl']}",
-                                                    expected=expected.to_json(),
-                                                    actual=purl.normalize().to_json(),
-                                                )
-                                            )
-                                        elif (
-                                            expected.normalize().casefold()
-                                            != canonical.normalize().casefold()
-                                        ):
-                                            failures.append(
-                                                Failure(
-                                                    implementation=driver.name,
-                                                    code="wrong_parse",
-                                                    test=test["description"],
-                                                    reason=f"Wrong parse for canonical purl {test['canonical_purl']}",
-                                                    expected=expected.to_json(),
-                                                    actual=canonical.normalize().to_json(),
-                                                )
-                                            )
-                                        elif expected.normalize() != purl.normalize():
-                                            failures.append(
-                                                Failure(
-                                                    implementation=driver.name,
-                                                    code="wrong_parse_case",
-                                                    test=test["description"],
-                                                    reason=f"Wrong case for valid purl {test['purl']}",
-                                                    expected=expected.to_json(),
-                                                    actual=purl.normalize().to_json(),
-                                                )
-                                            )
-                                        elif (
-                                            expected.normalize()
-                                            != canonical.normalize()
-                                        ):
-                                            failures.append(
-                                                Failure(
-                                                    implementation=driver.name,
-                                                    code="wrong_parse_case",
-                                                    test=test["description"],
-                                                    reason=f"Wrong case for canonical purl {test['canonical_purl']}",
-                                                    expected=expected.normalize().to_json(),
-                                                    actual=purl.normalize().to_json(),
-                                                )
-                                            )
-
-                                    [formatted] = await formatter.format([expected])
-                                    if isinstance(formatted, Error):
-                                        failures.append(
-                                            Failure(
-                                                implementation=driver.name,
-                                                code="unexpected_failure",
-                                                test=test["description"],
-                                                reason=f"Unexpected error formatting {json.dumps(expected.normalize().to_json())}",
+                                                reason=f"Unexpected error formatting test purl {json.dumps(purl.to_json())}",
                                                 expected=test["canonical_purl"],
                                                 actual=formatted.to_json(),
                                             )
                                         )
-                                    elif formatted == "":
+                                    elif purl.normalize() != canonical.normalize():
+                                        purl_folded = dict(((k, v.casefold() if isinstance(v, str) else v) for k, v in purl.normalize().to_json().items()))
+                                        canonical_folded = dict(((k, v.casefold() if isinstance(v, str) else v) for k, v in canonical.normalize().to_json().items()))
+                                        if purl_folded == canonical_folded:
+                                            failures.append(
+                                                Failure(
+                                                    implementation=driver.name,
+                                                    code="wrong_case",
+                                                    test=test["description"],
+                                                    reason="Parsing of canonical PURL and test PURL had different case",
+                                                    expected=canonical.to_json(),
+                                                    actual=purl.to_json(),
+                                                )
+                                            )
+                                        else:
+                                            failures.append(
+                                                Failure(
+                                                    implementation=driver.name,
+                                                    code="wrong_parse",
+                                                    test=test["description"],
+                                                    reason="Parsing of canonical PURL and test PURL had different results",
+                                                    expected=canonical.to_json(),
+                                                    actual=purl.to_json(),
+                                                )
+                                            )
+                                    else:
+                                        await compare_to_canonical(purl, purl_formatted, "test")
+
+                                    if isinstance(parts_formatted, Error) or parts_formatted == "":
                                         failures.append(
                                             Failure(
                                                 implementation=driver.name,
                                                 code="unexpected_failure",
                                                 test=test["description"],
-                                                reason=f"Unexpected error formatting {json.dumps(expected.normalize().to_json())}",
+                                                reason=f"Unexpected error formatting {json.dumps(parts.to_json())}",
                                                 expected=test["canonical_purl"],
-                                                actual="",
+                                                actual="[error]",
                                             )
                                         )
                                     else:
-                                        # Before we check that it's exactly right, check if it's right at all.
-                                        [round_trip] = await parser.parse(
-                                            [formatted]
-                                        )
-                                        if isinstance(round_trip, Error):
-                                            failures.append(
-                                                Failure(
-                                                    implementation=driver.name,
-                                                    code="unexpected_failure",
-                                                    test=test["description"],
-                                                    reason=f"Unexpected error parsing serialized purl {formatted}",
-                                                    expected=expected.to_json(),
-                                                    actual=round_trip.to_json(),
-                                                )
-                                            )
-                                        elif round_trip.normalize() != expected:
-                                            failures.append(
-                                                Failure(
-                                                    implementation=driver.name,
-                                                    code="round_trip",
-                                                    test=test["description"],
-                                                    reason=f"Serialized purl {formatted} did not parse as its input",
-                                                    expected=expected.normalize().to_json(),
-                                                    actual=round_trip.normalize().to_json(),
-                                                )
-                                            )
-                                        elif (
-                                            formatted.casefold()
-                                            != test["canonical_purl"].casefold()
-                                        ):
-                                            failures.append(
-                                                Failure(
-                                                    implementation=driver.name,
-                                                    code="wrong_format",
-                                                    test=test["description"],
-                                                    reason=f"Wrong format for {json.dumps(expected.normalize().to_json())}",
-                                                    expected=test[
-                                                        "canonical_purl"
-                                                    ],
-                                                    actual=formatted,
-                                                )
-                                            )
-                                        elif (
-                                            formatted != test["canonical_purl"]
-                                        ):
-                                            failures.append(
-                                                Failure(
-                                                    implementation=driver.name,
-                                                    code="wrong_format_case",
-                                                    test=test["description"],
-                                                    reason=f"Wrong case for {json.dumps(expected.normalize().to_json())}",
-                                                    expected=test[
-                                                        "canonical_purl"
-                                                    ],
-                                                    actual=formatted,
-                                                )
-                                            )
+                                        await compare_to_canonical(parts, parts_formatted, "from parts")
 
                                 pbar.update()
                     return failures
@@ -259,25 +271,7 @@ if __name__ == "__main__":
 
         all_failures = asyncio.run(main())
     all_failures = (failure for suite in all_failures for failure in suite)
-    result = []
-    for failure in sorted(all_failures):
-        skip = False
-        for allow in allowed:
-            if (
-                (
-                    allow.implementation is None
-                    or allow.implementation == failure.implementation
-                )
-                and (allow.code is None or allow.code == failure.code)
-                and (allow.test is None or allow.test == failure.test)
-                and (allow.reason is None or allow.reason == failure.reason)
-                and (allow.expected is None or allow.expected == failure.expected)
-                and (allow.actual is None or allow.actual == failure.actual)
-            ):
-                skip = True
-                break
-        if not skip:
-            result.append(failure.to_json())
+    result = [f.to_json() for f in sorted(all_failures)]
 
     print(json.dumps(result, indent=2))
     if len(result) > 0:
