@@ -41,13 +41,17 @@ defmodule Driver do
       sp -> String.split(sp, "/")
     end
 
-    %Purl{
+    to_string(%Purl{
       type: parts["type"],
       name: parts["name"],
       namespace: namespace,
       version: parts["version"],
       qualifiers: parts["qualifiers"] || %{},
       subpath: subpath,
-    }
+    })
+
+  rescue
+    error ->
+      JSON.encode!(error: Exception.message(error))
   end
 end

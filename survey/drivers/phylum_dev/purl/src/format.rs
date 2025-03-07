@@ -17,7 +17,22 @@ fn main() -> io::Result<()> {
         if line.is_empty() {
             continue;
         }
-        let parts: json::Parts = serde_json::from_str(line).unwrap();
+        let parts: json::Parts = match serde_json::from_str(line) {
+            Ok(parts) => parts,
+            Err(error) => {
+                let mut out = io::stdout().lock();
+                serde_json::to_writer(
+                    &mut out,
+                    &json::Error {
+                        error: error.to_string(),
+                    },
+                )
+                .unwrap();
+                writeln!(io::stdout().lock())?;
+                out.flush()?;
+                continue;
+            }
+        };
         let purl = if let Ok(r#type) = PackageType::from_str(&parts.r#type) {
             build(r#type, &parts).map_err(|e| format!("{e:?}"))
         } else {
