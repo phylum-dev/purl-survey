@@ -1,7 +1,6 @@
 name: Generate and publish
 
 on:
-  push:
   workflow_dispatch:
 
 permissions:
