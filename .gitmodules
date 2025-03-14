@@ -43,3 +43,6 @@
 [submodule "survey/drivers/anchore/packageurl_go/repo"]
 	path = survey/drivers/anchore/packageurl_go/repo
 	url = https://github.com/anchore/packageurl-go.git
+[submodule "survey/drivers/iseki0/purlkt/repo"]
+	path = survey/drivers/iseki0/purlkt/repo
+	url = https://github.com/iseki0/PUrlKt.git
