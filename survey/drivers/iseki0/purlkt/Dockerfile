@@ -5,7 +5,7 @@ ENTRYPOINT [ "java", "-classpath", "build/libs/*" ]
 WORKDIR /purl
 COPY . .
 
-RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
+RUN --mount=type=cache,target=/home/gradle/.gradle/caches,sharing=locked \
     (cd /purl/repo && gradle --build-cache build) && \
     gradle --build-cache build && \
     gradle --stop
