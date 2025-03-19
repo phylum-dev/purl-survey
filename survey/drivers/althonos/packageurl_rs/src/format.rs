@@ -16,7 +16,22 @@ fn main() -> io::Result<()> {
         if line.is_empty() {
             continue;
         }
-        let parts: json::Parts = serde_json::from_str(line).unwrap();
+        let parts: json::Parts = match serde_json::from_str(line) {
+            Ok(parts) => parts,
+            Err(error) => {
+                let mut out = io::stdout().lock();
+                serde_json::to_writer(
+                    &mut out,
+                    &json::Error {
+                        error: error.to_string(),
+                    },
+                )
+                .unwrap();
+                writeln!(out)?;
+                out.flush()?;
+                continue;
+            }
+        };
         let mut out = io::stdout().lock();
         match build(&parts) {
             Ok(purl) => writeln!(out, "{purl}")?,

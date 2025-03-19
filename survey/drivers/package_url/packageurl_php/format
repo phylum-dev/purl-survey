@@ -1,6 +1,6 @@
 <?php
 
-error_reporting(E_ALL ^ E_DEPRECATED);
+ini_set("display_errors", "stderr");
 
 include("repo/src/BuildParseTrait.php");
 include("repo/src/PackageUrl.php");
@@ -19,7 +19,7 @@ while ($line = fgets(STDIN)) {
         if (isset($parts["namespace"])) {
             $purl = $purl->setNamespace($parts["namespace"]);
         }
-        if (isset($parts["version"]))     {
+        if (isset($parts["version"])) {
             $purl = $purl->setVersion($parts["version"]);
         }
         if (isset($parts["qualifiers"])) {

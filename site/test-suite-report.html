@@ -1,0 +1,238 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      td {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <input type="checkbox" id="core-only"></input><label for="core-only" title="Skip tests that require type-specific implementation">core only</label>
+
+    <script crossorigin="anonymous" integrity="sha384-VRhlkYEqoAXsWzoORIQL0gHdX0BvQoQG89GxEj7I4xlffttgMvoMsQr7E/IWGK9T" src="https://unpkg.com/chroma-js@2.4.2/chroma.min.js"></script>
+    <script crossorigin="anonymous" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" src="https://unpkg.com/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script crossorigin="anonymous" integrity="sha384-AiTRpehQ7zqeua0Ypfa6Q4ki/ddhczZxrKtiQbTQUlJIhBkTeyoZP9/W/5ulFt29" src="https://unpkg.com/tippy.js@6.3.7/dist/tippy-bundle.umd.min.js"></script>
+    <script type="module">
+      const report = await fetch("test-suite-report.json").then((r) => r.json());
+      const implementations = report.implementations.map((i) => i.name).toSorted();
+      const versions = new Map(report.implementations.map((i) => [i.name, i.version]));
+      const tests = report.suite.sort((a, b) => a.description.localeCompare(b));
+      const codes = new Map(Array.from(new Set(report.failures.map((f) => f.code))).sort().map((c) => {
+        const e = document.createElement("input");
+        e.type = "checkbox";
+        e.id = c;
+        e.checked = true;
+        e.addEventListener("change", render);
+        document.body.appendChild(e);
+
+        const l = document.createElement("label");
+        l.for = c;
+        l.appendChild(document.createTextNode(c));
+        document.body.appendChild(l);
+
+        return [c, e];
+      }));
+      const core_only = document.getElementById("core-only");
+      core_only.addEventListener("change", render);
+
+      // Blacklist of tests that only pass for implementations with type-specific knowledge.
+      const type_specific = new Set([
+        "Hugging Face model with various cases",
+        "MLflow model tracked in Azure Databricks (case insensitive)",
+        "bitbucket namespace and name should be lowercased",
+        "composer names are not case sensitive",
+        "cpan distribution name like module name",
+        "cpan module name like distribution name",
+        "github namespace and name should be lowercased",
+        "invalid conan purl only channel qualifier",
+        "invalid conan purl only namespace",
+        "invalid cran purl without version",
+        "invalid swift purl without namespace",
+        "invalid swift purl without version",
+        "pypi names have special rules and not case sensitive",
+        // This test is wrong.
+        // The wrong version from the spec is not type-specific but the but the correct version (nuget names are _not_ case sensitive) is.
+        "nuget names are case sensitive",
+      ]);
+
+      function renderOutput(output) {
+        if (typeof output === "string") {
+          return document.createTextNode(output);
+        } else {
+          return document.createTextNode(JSON.stringify(output));
+        }
+      }
+
+      function render() {
+        const failures = report.failures.filter((f) => codes.get(f.code).checked && (!core_only.checked || !type_specific.has(f.test)));
+        const failuresByTest = new Map(Object.entries(Object.groupBy(failures, (f) => f.test)).map(([k, t]) => [k, new Map(Object.entries(Object.groupBy(t, (f) => f.implementation)))]));
+        for (const test of tests) {
+          const value = failuresByTest.get(test.description);
+          if (value === undefined) {
+            failuresByTest.set(test.description, new Map(implementations.map((i) => [i, []])));
+          } else {
+            for (const implementation of implementations) {
+              if (!value.has(implementation)) {
+                value.set(implementation, []);
+              }
+            }
+          }
+        }
+
+        const totalsByTest = new Map(failuresByTest.entries().map(([k, t]) => [k, Array.from(t.values()).flat().length]));
+        const totalsByImplementation = new Map(implementations.map((i) => [i, Array.from(failuresByTest.values()).flatMap((t) => t.get(i)).length]));
+        const allTotal = failures.length;
+
+        const maxTestFailures = Math.max(...totalsByTest.values());
+        const maxImplementationFailures = Math.max(...totalsByImplementation.values());
+
+        const testFailureScale = chroma.scale("RdPu");
+        testFailureScale.domain([0, Math.max(1, maxTestFailures)]);
+        const implementationFailureScale = chroma.scale("RdPu");
+        implementationFailureScale.domain([0, Math.max(1, maxImplementationFailures)]);
+
+        const table = document.createElement("table");
+        table.id = "report";
+        const thead = document.createElement("thead");
+        const theadr = document.createElement("tr");
+        theadr.appendChild(document.createElement("td"));
+        for (const implementation of implementations) {
+          const columnTotal = totalsByImplementation.get(implementation);
+          const background = implementationFailureScale(columnTotal);
+          const blackContrast = chroma.contrast(background, "black");
+          const whiteContrast = chroma.contrast(background, "white");
+          const foreground = blackContrast > whiteContrast ? "black" : "white";
+
+          const td = document.createElement("td");
+          td.appendChild(document.createTextNode(implementation));
+          td.style.background = background;
+          td.style.color = foreground;
+          theadr.appendChild(td);
+
+          tippy(td, {
+            content: versions.get(implementation),
+            interactive: true,
+          });
+        }
+        theadr.appendChild(document.createElement("td"));
+        thead.appendChild(theadr);
+        table.appendChild(thead);
+
+        for (const test of tests) {
+          if (core_only.checked && type_specific.has(test.description)) {
+            continue;
+          }
+
+          const rowTotal = totalsByTest.get(test.description);
+          const rowBackground = testFailureScale(rowTotal);
+          const rowBlackContrast = chroma.contrast(rowBackground, "black");
+          const rowWhiteContrast = chroma.contrast(rowBackground, "white");
+          const rowForeground = rowBlackContrast > rowWhiteContrast ? "black" : "white";
+
+          const tr = document.createElement("tr");
+          const th = document.createElement("th");
+          th.appendChild(document.createTextNode(test.description));
+          th.style.background = rowBackground;
+          th.style.color = rowForeground;
+          tippy(th, {
+            content: test.purl,
+          });
+          tr.appendChild(th);
+
+          for (const implementation of implementations) {
+            const cellFailures = failuresByTest.get(test.description).get(implementation);
+            const columnTotal = totalsByImplementation.get(implementation);
+            const columnBackground = implementationFailureScale(columnTotal);
+            const cellBackground = chroma.average([rowBackground, columnBackground]);
+            const cellBlackContrast = chroma.contrast(cellBackground, "black");
+            const cellWhiteContrast = chroma.contrast(cellBackground, "white");
+            const cellForeground = cellBlackContrast > cellWhiteContrast ? "black" : "white";
+
+            const td = document.createElement("td");
+            td.appendChild(document.createTextNode(cellFailures.length));
+            td.style.background = cellBackground;
+            td.style.color = cellForeground;
+
+            if (cellFailures.length > 0) {
+              const failures = document.createElement("ul");
+              for (const failure of failuresByTest.get(test.description).get(implementation)) {
+                const li = document.createElement("li");
+
+                const title = document.createElement("h4");
+                title.appendChild(document.createTextNode(failure.reason));
+                li.appendChild(title);
+
+                const code = document.createElement("h5");
+                code.appendChild(document.createTextNode(failure.code));
+                li.appendChild(code);
+
+                const dl = document.createElement("dl");
+                const dte = document.createElement("dt");
+                dte.appendChild(document.createTextNode("Expected"));
+                dl.appendChild(dte);
+                const dde = document.createElement("dd");
+                dde.appendChild(renderOutput(failure.expected));
+                dl.appendChild(dde);
+                const dta = document.createElement("dt");
+                dta.appendChild(document.createTextNode("Actual"));
+                dl.appendChild(dta);
+                const dda = document.createElement("dd");
+                dda.appendChild(renderOutput(failure.actual));
+                dl.appendChild(dda);
+                li.appendChild(dl);
+
+                failures.appendChild(li);
+              }
+
+              tippy(td, {
+                content: failures,
+                interactive: true,
+              });
+            }
+
+            tr.appendChild(td);
+          }
+
+          const totalTd = document.createElement("td");
+          totalTd.appendChild(document.createTextNode(rowTotal));
+          totalTd.style.background = rowBackground;
+          totalTd.style.color = rowForeground;
+          tr.appendChild(totalTd);
+
+          table.appendChild(tr);
+        }
+
+        const tfoot = document.createElement("tfoot");
+        const tfootr = document.createElement("tr");
+        tfootr.appendChild(document.createElement("td"));
+        for (const implementation of implementations) {
+          const columnTotal = totalsByImplementation.get(implementation);
+          const background = implementationFailureScale(columnTotal);
+          const blackContrast = chroma.contrast(background, "black");
+          const whiteContrast = chroma.contrast(background, "white");
+          const foreground = blackContrast > whiteContrast ? "black" : "white";
+
+          const td = document.createElement("td");
+          td.appendChild(document.createTextNode(totalsByImplementation.get(implementation).toString()));
+          td.style.background = background;
+          td.style.color = foreground;
+          tfootr.appendChild(td);
+        }
+        const allTotalTd = document.createElement("td");
+        allTotalTd.appendChild(document.createTextNode(allTotal.toString()));
+        tfootr.appendChild(allTotalTd);
+        tfoot.appendChild(tfootr);
+        table.appendChild(tfoot);
+
+        const previous = document.getElementById("report");
+        if (previous) {
+          document.body.removeChild(previous);
+        }
+        document.body.appendChild(table);
+      }
+
+      render();
+    </script>
+  </body>
+</html>

@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0
 WORKDIR /purl
 COPY . .
 
-RUN --mount=type=cache,target=/root/.nuget \
+RUN --mount=type=cache,target=/root/.nuget,sharing=locked \
     --mount=type=cache,target=/purl/core/obj \
     --mount=type=cache,target=/purl/format/obj \
     --mount=type=cache,target=/purl/parse/obj \

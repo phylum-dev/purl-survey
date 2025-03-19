@@ -3,6 +3,7 @@ from pathlib import Path
 import importlib
 from typing import Optional
 
+
 @dataclass(frozen=True)
 class Error:
     error: str
@@ -12,6 +13,7 @@ class Error:
 
     def to_json(self):
         return {"error": self.error}
+
 
 @dataclass(frozen=True)
 class Parts:
@@ -25,7 +27,7 @@ class Parts:
     def normalize(self):
         """
         Replace empty values with None and sorts dictionary keys.
-        
+
         This makes comparison easier, and some of the format implementations behave differently when given an empty value.
         """
         type = self.type if self.type != "" else None
@@ -45,7 +47,7 @@ class Parts:
             qualifiers=qualifiers,
             subpath=subpath,
         )
-    
+
     def casefold(self):
         """
         Casefold values.
@@ -58,10 +60,12 @@ class Parts:
             name=self.name.casefold(),
             namespace=self.namespace.casefold() if self.namespace is not None else None,
             version=self.version.casefold() if self.version is not None else None,
-            qualifiers={k: v.casefold() for k, v in self.qualifiers.items()} if self.qualifiers is not None else None,
+            qualifiers={k: v.casefold() for k, v in self.qualifiers.items()}
+            if self.qualifiers is not None
+            else None,
             subpath=self.subpath.casefold() if self.subpath is not None else None,
         )
-    
+
     @classmethod
     def from_json(cls, json):
         return Parts(
@@ -89,19 +93,32 @@ class Parts:
             d["subpath"] = self.subpath
         return d
 
+
 def drivers():
     """Enumerate all drivers."""
 
-    root: Path = Path(__file__).parent / 'drivers'
-    owners = (owner for owner in root.iterdir() if owner.is_dir())
-    repos = (repo for owner in owners for repo in owner.iterdir() if repo.is_dir())
-    files = (file for file in (repo / '__init__.py' for repo in repos) if file.exists())
+    root: Path = Path(__file__).parent / "drivers"
+    owners = (
+        owner
+        for owner in root.iterdir()
+        if owner.is_dir() and (owner / "__init__.py").exists()
+    )
+    repos = (
+        repo
+        for owner in owners
+        for repo in owner.iterdir()
+        if repo.is_dir() and (repo / "__init__.py").exists()
+    )
 
     def make_module_path(path):
-        return f"survey.drivers.{path.parent.parent.name}.{path.parent.name}"
+        return f"survey.drivers.{path.parent.name}.{path.name}"
 
-    modules = (importlib.import_module(make_module_path(file)) for file in files)
-    classes = (c for c in (module.__dict__.get("Driver") for module in modules) if isinstance(c, type))
+    modules = (importlib.import_module(make_module_path(repo)) for repo in repos)
+    classes = (
+        c
+        for c in (module.__dict__.get("Driver") for module in modules)
+        if isinstance(c, type)
+    )
     drivers = (c() for c in classes)
 
     return drivers
